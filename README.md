@@ -1,2 +1,3 @@
-# VICON_ROS_Headset_communication
-This repo contains server side code that is used to connect to VICON, ROS and Headset
+# base codes for multi drone app
+- ROS code for crazy flies
+- server that is used to connect with headset and ROS
