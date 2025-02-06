@@ -1,0 +1,45 @@
+# Renew after add new file
+chmod +x ~/CrazySim/ros2_ws/install/crazyflie/lib/crazyflie/crazyflie_server.py
+
+
+#start the firmware  VR only
+cd CrazySim/crazyflie-firmware
+bash tools/crazyflie-simulation/simulator_files/gazebo/launch/sitl_multiagent_square.sh -n 2 -m crazyflie
+
+#Start connection
+ros2 launch crazyflie launch.py backend:=cflib
+ros2 launch crazyflie_ar launch.py backend:=cflib
+
+#Run HERO_XR
+ros2 run crazyflie_ar Headset2ROS_Launch.py
+
+#build ws
+colcon build --symlink-install
+
+#Check the status
+ros2 node info
+ros2 node list
+ros2 topic list
+ros2 topic echo
+rqt_graph
+
+#Running command
+ros2 topic pub --once /cf_1/takeoff std_msgs/Empty "{}"
+ros2 topic pub --once /cf_1/land std_msgs/Empty "{}"
+ros2 topic pub --once /cf_1/go_to geometry_msgs/Pose "{position: {x: 0.0, y: 0.0, z: 2.0}}"
+
+#Launch Vicon
+ros2 launch vrpn_mocap client.launch.yaml server:=192.168.0.101 port:=3883
+
+#Launch real drone server
+ros2 launch crazyflie_ar launch.py backend:=cflib
+
+#CMD for real drone
+ros2 topic pub --once /cpsl_cf_1/takeoff std_msgs/Empty "{}"
+ros2 topic pub --once /cpsl_cf_1/land std_msgs/Empty "{}"
+ros2 topic pub --once /cpsl_cf_1/go_to geometry_msgs/Pose "{position: {x: 0.0, y: 0.0, z: 2.0}}"
+
+#Run the Headset2ROS server
+python -m uvicorn ViconDroneServer:app --host 0.0.0.0 --port 8000 --reload
+
+
