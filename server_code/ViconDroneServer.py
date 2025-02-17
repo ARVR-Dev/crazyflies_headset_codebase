@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from threading import Lock
 from typing import List,Tuple, Annotated
 from Bot import Bot
-import sys
+import shutil
 
 
 class Headset:
@@ -24,11 +24,14 @@ class Headset:
     def computeViconToUnityTransform(self):
         self.viconToUnityTransform = self.computeTransformationMatrix(np.array(self.unityPositions),np.array(self.viconPositions))
     
-    def transformViconPoint(self,point):
+    def transformViconPoint(self,point,useInverse=False):
         homogeneous_point = np.array([point[0], point[1], point[2], 1.0])
 
         # Apply the transformation
-        transformed_homogeneous = self.viconToUnityTransform @ homogeneous_point
+        if(useInverse == False):
+            transformed_homogeneous = self.viconToUnityTransform @ homogeneous_point
+        else:
+            transformed_homogeneous = np.linalg.inv(self.viconToUnityTransform) @ homogeneous_point
 
         # Return the transformed x, y, z (ignore the homogeneous component)
         return transformed_homogeneous[:3]
@@ -104,6 +107,11 @@ class HeadsetPose(BaseModel):
     position: List[float]
     orientation: List[float]
 
+class DroneDestination(BaseModel):
+    namespace: str
+    position: List[float]
+    orientation: List[float]
+
 
 class FastAPP(FastAPI):
     lock = Lock()
@@ -121,6 +129,7 @@ class FastAPP(FastAPI):
 
 #Create server application
 app = FastAPP()
+
 
 #Route for receiving pose POST requests from drones. Upon request,
 #the drone's current coords are stored within its representation in the 
@@ -206,6 +215,38 @@ async def getDroneCurrentTrajectory(droneNamespace: str = "/default"):
                 return {"trajectoryPoints": [[-1000.0,-1000.0,-1000.0]]}
         else:
             return {"trajectoryPoints": [[-1000.0,-1000.0,-1000.0]]}
+
+@app.post("/senddronedestination")
+async def sendDroneDestination(droneDestination: DroneDestination):
+    with app.lock:
+        if(droneDestination.namespace in app.operatingDrones.keys()):
+            app.operatingDrones[droneDestination.namespace].targetPositions.append(droneDestination.position)
+            app.operatingDrones[droneDestination.namespace].targetOrientations.append(droneDestination.orientation)
+            
+            
+
+@app.get("/getoldestdronedestination")
+async def getOldestDroneDestination(droneNamespace: str = "/default"):
+    with app.lock:
+        if(droneNamespace in app.operatingDrones.keys() and app.headset.viconToUnityTransform != "None"):
+            if(len(app.operatingDrones[droneNamespace].targetOrientations)>0 and len(app.operatingDrones[droneNamespace].targetPositions) >0):
+                return {"destination": app.headset.transformViconPoint(app.operatingDrones[droneNamespace].pop(),True).tolist()}
+            else:
+                return {"destination": [-1000.0,-1000.0,-1000.0]}
+        else:
+            return {"destination": [-1000.0,-1000.0,-1000.0]}
+        
+@app.post("/uploadaudio")
+async def uploadAudio(audioFile: UploadFile = File(...)):
+    with app.lock:
+        try:
+            file_location = "received_audio.wav"
+            with open(file_location, "wb") as buffer:
+                shutil.copyfileobj(audioFile.file, buffer)
+            return {"message": "File received successfully!", "filename": audioFile.filename}
+        except Exception as e:
+            return {"error": str(e)}
+
 
 
 

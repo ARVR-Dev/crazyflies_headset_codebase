@@ -6,5 +6,7 @@ class Bot:
         self.currentOrientation ="None"
         self.currentTrajectory = [[-1000,-1000,-1000]]
         self.currentBatteryPercentage = -1.0
+        self.targetPositions = []
+        self.targetOrientations = []
         
 
