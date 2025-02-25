@@ -8,6 +8,8 @@ from threading import Lock
 from typing import List,Tuple, Annotated
 from Bot import Bot
 import shutil
+import sys
+
 
 
 class Headset:
@@ -216,25 +218,69 @@ async def getDroneCurrentTrajectory(droneNamespace: str = "/default"):
         else:
             return {"trajectoryPoints": [[-1000.0,-1000.0,-1000.0]]}
 
+# @app.post("/senddronedestination")
+# async def sendDroneDestination(droneDestination: DroneDestination):
+#     with app.lock:
+#         if(droneDestination.namespace in app.operatingDrones.keys()):
+#             app.operatingDrones[droneDestination.namespace].targetPositions.append(droneDestination.position)
+#             app.operatingDrones[droneDestination.namespace].targetOrientations.append(droneDestination.orientation)
+#         return {"active_drones": list(app.operatingDrones.keys())}
+
 @app.post("/senddronedestination")
 async def sendDroneDestination(droneDestination: DroneDestination):
     with app.lock:
-        if(droneDestination.namespace in app.operatingDrones.keys()):
-            app.operatingDrones[droneDestination.namespace].targetPositions.append(droneDestination.position)
-            app.operatingDrones[droneDestination.namespace].targetOrientations.append(droneDestination.orientation)
-            
-            
+        # If drone does not exist, create a new Bot instance
+        if droneDestination.namespace not in app.operatingDrones:
+            print(f"New drone detected: {droneDestination.namespace}, initializing data.")  # Debugging output
+            app.operatingDrones[droneDestination.namespace] = Bot(droneDestination.namespace)
+
+        # Append the new target position and orientation
+        app.operatingDrones[droneDestination.namespace].targetPositions.append(droneDestination.position)
+        app.operatingDrones[droneDestination.namespace].targetOrientations.append(droneDestination.orientation)
+
+        # Debugging: Print stored data
+        print(f"Drone {droneDestination.namespace} updated.")
+        print(f"Target Positions: {app.operatingDrones[droneDestination.namespace].targetPositions}")
+        print(f"Target Orientations: {app.operatingDrones[droneDestination.namespace].targetOrientations}")
+
+        return {"status": "success", "message": f"Drone {droneDestination.namespace} updated"}
+
+
+# @app.get("/getoldestdronedestination")
+# async def getOldestDroneDestination(droneNamespace: str = "/default"):
+#     with app.lock:
+#         if(droneNamespace in app.operatingDrones.keys() and app.headset.viconToUnityTransform != "None"):
+#             if(len(app.operatingDrones[droneNamespace].targetOrientations)>0 and len(app.operatingDrones[droneNamespace].targetPositions) >0):
+#                 return {"destination": app.headset.transformViconPoint(app.operatingDrones[droneNamespace].pop(),True).tolist()}
+#             else:
+#                 return {"destination": [-1000.0,-1000.0,-1000.0]}
+#         else:
+#             return {"destination": [-1000.0,-1000.0,-1000.0]}
 
 @app.get("/getoldestdronedestination")
 async def getOldestDroneDestination(droneNamespace: str = "/default"):
     with app.lock:
-        if(droneNamespace in app.operatingDrones.keys() and app.headset.viconToUnityTransform != "None"):
-            if(len(app.operatingDrones[droneNamespace].targetOrientations)>0 and len(app.operatingDrones[droneNamespace].targetPositions) >0):
-                return {"destination": app.headset.transformViconPoint(app.operatingDrones[droneNamespace].pop(),True).tolist()}
-            else:
-                return {"destination": [-1000.0,-1000.0,-1000.0]}
+        if droneNamespace in app.operatingDrones and app.headset.viconToUnityTransform is not None:
+            if len(app.operatingDrones[droneNamespace].targetPositions) > 0:
+                # Pop from target positions, taking oldest first
+                position = app.operatingDrones[droneNamespace].targetPositions.pop(0)
+                
+                try:
+                    transformed_position = app.headset.transformViconPoint(position, True).tolist()
+                    return {"destination": transformed_position} 
+                except Exception as e:
+                    return {"error": f"Transformation failed: {str(e)}"}
+
+            return {"destination": [-1000.0, -1000.0, -1000.0]}  # No available target
         else:
-            return {"destination": [-1000.0,-1000.0,-1000.0]}
+            return {"destination": [-1000.0, -1000.0, -1000.0]}  # No valid transformation
+
+
+        
+@app.get("/getdronenames")
+async def getDroneNames():
+    return {"active_drones": list(app.operatingDrones.keys())}
+
         
 @app.post("/uploadaudio")
 async def uploadAudio(audioFile: UploadFile = File(...)):

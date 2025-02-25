@@ -40,6 +40,7 @@ ros2 topic pub --once /cpsl_cf_1/land std_msgs/Empty "{}"
 ros2 topic pub --once /cpsl_cf_1/go_to geometry_msgs/Pose "{position: {x: 0.0, y: 0.0, z: 2.0}}"
 
 #Run the Headset2ROS server
+cd /Documents/crazyflies_headset_codebase/server_code
 python -m uvicorn ViconDroneServer:app --host 0.0.0.0 --port 8000 --reload
 
 ros2 run crazyflie_ar HeadsetPose2Json.py 
