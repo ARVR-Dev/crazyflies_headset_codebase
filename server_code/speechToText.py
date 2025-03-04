@@ -1,20 +1,31 @@
 import vosk
 import wave
 import json
+import sys
 
-# Load the Vosk model from the extracted directory
-model_path = "model/vosk-model-small-en-us-0.15"
+
+if len(sys.argv) < 2:
+    print("Usage: python speechToText.py <audio_file>")
+    sys.exit(1)
+
+# Get the input audio file from command-line arguments
+audio_file = sys.argv[1]
+# Load the Vosk model
+model_path = "vosk_model/vosk-model-small-en-us-0.15"
 model = vosk.Model(model_path)
 
 # Open the audio file
-audio_file = "output.wav"  # Change to your actual file
+
 wf = wave.open(audio_file, "rb")
 
 # Initialize the recognizer
 rec = vosk.KaldiRecognizer(model, wf.getframerate())
 
-# Open a text file to store the results
+# Define the output transcription file
 output_file = "transcription.txt"
+
+# Process audio and get transcription
+transcription = ""
 
 with open(output_file, "w") as f:
     while True:
@@ -23,12 +34,19 @@ with open(output_file, "w") as f:
             break
         if rec.AcceptWaveform(data):
             result = json.loads(rec.Result())
-            f.write(result["text"] + "\n")  # Write to file
-            print("Recognized Text:", result["text"])
+            text = result["text"]
+            transcription += text + " "
+            f.write(text + "\n")  # Write to file
+            print(text)  # Print for capturing in `voice_control.py`
 
-    # Write the final result
+    # Get final result
     final_result = json.loads(rec.FinalResult())
-    f.write(final_result["text"] + "\n")
-    print("Final Transcript:", final_result["text"])
+    final_text = final_result["text"]
+    transcription += final_text
+    f.write(final_text + "\n")  # Write final result to file
+    print(final_text)  # Print final text for piping
 
-print(f"Transcription saved to {output_file}")
+# Print full transcription for `voice_control.py`
+print(transcription.strip())
+
+sys.exit(0)  # Ensure script exits successfully
