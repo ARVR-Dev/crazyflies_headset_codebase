@@ -9,6 +9,8 @@ from typing import List,Tuple, Annotated
 from Bot import Bot
 import shutil
 import sys
+import subprocess
+
 
 
 
@@ -306,7 +308,14 @@ async def uploadAudio(audioFile: UploadFile = File(...)):
             file_location = "received_audio.wav"
             with open(file_location, "wb") as buffer:
                 shutil.copyfileobj(audioFile.file, buffer)
-            return {"message": "File received successfully!", "filename": audioFile.filename}
+            result = subprocess.run(
+            ["python3", "server_code/api_process_voice_command.py", "received_audio.wav"], 
+            capture_output=True, 
+            text=True
+            )
+            return {
+            "message": "File received and processed successfully!",
+            "transcription_result": result.stdout}        
         except Exception as e:
             return {"error": str(e)}
 

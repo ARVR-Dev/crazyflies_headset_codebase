@@ -1,5 +1,0 @@
-<script>start("/Users/theoy/Downloads/model/");</script>
-<script>onHasParentDirectory();</script>
-<script>addRow("vosk-model-en-us-0.22-lgraph","vosk-model-en-us-0.22-lgraph",1,224,"224 B",1637730056,"11/24/21, 12:00:56 AM");</script>
-<script>addRow("vosk-model-small-en-us-0.15","vosk-model-small-en-us-0.15",1,224,"224 B",1607463562,"12/8/20, 4:39:22 PM");</script>
-<script>addRow(".DS_Store",".DS_Store",0,6148,"6.0 kB",1741123008,"3/4/25, 4:16:48 PM");</script>
