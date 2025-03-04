@@ -1,0 +1,1 @@
+/home/cpsl/HERO_XR_AR/build/motion_capture_tracking_interfaces/rosidl_typesupport_fastrtps_c/motion_capture_tracking_interfaces/msg/detail/named_pose__rosidl_typesupport_fastrtps_c.h

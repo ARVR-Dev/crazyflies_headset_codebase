@@ -1,0 +1,1 @@
+/home/cpsl/HERO_XR_AR/build/vrpn_mocap/ament_cmake_core/vrpn_mocapConfig.cmake

@@ -1,0 +1,1 @@
+/home/cpsl/HERO_XR_AR/src/motion_capture_tracking/motion_capture_tracking_interfaces/msg/NamedPoseArray.msg

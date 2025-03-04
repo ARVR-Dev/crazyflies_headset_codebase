@@ -1,0 +1,8 @@
+source;share/crazyflie_ar/hook/cmake_prefix_path.ps1
+source;share/crazyflie_ar/hook/cmake_prefix_path.dsv
+source;share/crazyflie_ar/hook/cmake_prefix_path.sh
+source;share/crazyflie_ar/local_setup.bash
+source;share/crazyflie_ar/local_setup.dsv
+source;share/crazyflie_ar/local_setup.ps1
+source;share/crazyflie_ar/local_setup.sh
+source;share/crazyflie_ar/local_setup.zsh

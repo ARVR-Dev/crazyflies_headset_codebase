@@ -1,0 +1,1 @@
+/home/cpsl/HERO_XR_AR/build/crazyflie_ar/ament_cmake_environment_hooks/local_setup.bash

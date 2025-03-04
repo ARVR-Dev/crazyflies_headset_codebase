@@ -113,6 +113,7 @@ class DroneDestination(BaseModel):
     namespace: str
     position: List[float]
     orientation: List[float]
+    commandType: str
 
 
 class FastAPP(FastAPI):
@@ -230,9 +231,23 @@ async def getDroneCurrentTrajectory(droneNamespace: str = "/default"):
 async def sendDroneDestination(droneDestination: DroneDestination):
     with app.lock:
         # If drone does not exist, create a new Bot instance
+        
         if droneDestination.namespace not in app.operatingDrones:
             print(f"New drone detected: {droneDestination.namespace}, initializing data.")  # Debugging output
             app.operatingDrones[droneDestination.namespace] = Bot(droneDestination.namespace)
+        
+        if(droneDestination.commandType != "goTo"):
+            action = ""
+            if(droneDestination.commandType == "takeoff"):
+                app.operatingDrones[droneDestination.namespace].targetPositions.append("takeoff")
+                action = "takeoff"
+            elif(droneDestination.commandType == "land"):
+                app.operatingDrones[droneDestination.namespace].targetPositions.append("land")
+                action = "land"
+            else:
+                pass
+            return {"status": "success", "message": "Drone set to: "+action}
+
 
         # Append the new target position and orientation
         app.operatingDrones[droneDestination.namespace].targetPositions.append(droneDestination.position)
@@ -264,6 +279,8 @@ async def getOldestDroneDestination(droneNamespace: str = "/default"):
             if len(app.operatingDrones[droneNamespace].targetPositions) > 0:
                 # Pop from target positions, taking oldest first
                 position = app.operatingDrones[droneNamespace].targetPositions.pop(0)
+                if(position == "takeoff" or position == "land"):
+                    return {"destination": position} 
                 
                 try:
                     transformed_position = app.headset.transformViconPoint(position, True).tolist()
