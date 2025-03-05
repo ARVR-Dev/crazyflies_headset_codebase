@@ -176,5 +176,4 @@ server_code/voice_control.py
 # Example voice commands
 example_voice_commands/
 
-# voice recognition packages
-vosk_models/
+vosk_model/
