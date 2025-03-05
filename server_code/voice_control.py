@@ -76,7 +76,6 @@ openai_llm = ChatOpenAI(
     max_retries=2,
     openai_api_key="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"
 )
-
 # ROSA instance, and pass all possible function
 agent = ROSA(ros_version=2, llm=openai_llm, tools=[crazyflie_takeoff, crazyflie_land, crazyflie_go_to])
 
