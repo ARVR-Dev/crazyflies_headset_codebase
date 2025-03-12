@@ -153,11 +153,11 @@ async def sendDroneCurrentCoords(droneState: DroneState):
 @app.post("/sendheadsetcurrentposeunity")
 async def sendHeadsetCurrentPoseUnity(headsetPoseUnity: HeadsetPose):
     with app.lock:
-        #app.headset.unityPositions.append(headsetPoseUnity.position)
-        #app.headset.unityOrientations.append(headsetPoseUnity.orientation)
+        # app.headset.unityPositions.append(headsetPoseUnity.position)
+        # app.headset.unityOrientations.append(headsetPoseUnity.orientation)
         app.headset.currentUnityPosition = headsetPoseUnity.position
         app.headset.currentUnityOrientation = headsetPoseUnity.orientation
-        #if(app.headset.viconToUnityTransform == "None" and len(app.headset.unityPositions) >= 500 and len(app.headset.viconPositions) >= 500):
+        # if(app.headset.viconToUnityTransform is None and len(app.headset.unityPositions) >= 500 and len(app.headset.viconPositions) >= 500):
         #    app.headset.computeViconToUnityTransform()
 
 
@@ -169,11 +169,10 @@ async def sendHeadsetCurrentPoseVicon(headsetPoseVicon: HeadsetPose):
             app.headset.viconOrientations.append(headsetPoseVicon.orientation)
             app.headset.unityPositions.append(app.headset.currentUnityPosition)
             app.headset.unityOrientations.append(app.headset.currentUnityOrientation)
-            if(app.headset.viconToUnityTransform == "None" and len(app.headset.unityPositions) >= app.NUM_LOCALIZATION_SAMPLES and len(app.headset.viconPositions) >= app.NUM_LOCALIZATION_SAMPLES):
+            if(app.headset.viconToUnityTransform is not None and len(app.headset.unityPositions) >= app.NUM_LOCALIZATION_SAMPLES and len(app.headset.viconPositions) >= app.NUM_LOCALIZATION_SAMPLES):
                 app.headset.computeViconToUnityTransform()
         else:
             pass
-
 
 #Route used by headset to fetch most recent stored coords
 #of drone with specified namespace, relative to Vicon frame
@@ -189,7 +188,7 @@ async def getDroneCurrentCoords(droneNamespace: str = "/default"):
         print("Vicon")
         print(len(app.headset.viconPositions))
         #Make sure drone is active and there is a valid vicon to unity transformation
-        if(app.headset.viconToUnityTransform != "None" and droneNamespace in app.operatingDrones.keys()):
+        if(app.headset.viconToUnityTransform is not None and droneNamespace in app.operatingDrones.keys()):
             print("Original point")
             print(app.operatingDrones[droneNamespace].currentPosition)
             transformedPoint = app.headset.transformViconPoint(app.operatingDrones[droneNamespace].currentPosition)
@@ -213,7 +212,7 @@ async def getDroneCurrentBatteryPercentage(droneNamespace: str = "/default"):
 @app.get("/getdronecurrenttrajectory")
 async def getDroneCurrentTrajectory(droneNamespace: str = "/default"):
     with app.lock:
-        if(droneNamespace in app.operatingDrones.keys() and app.headset.viconToUnityTransform != "None"):
+        if(droneNamespace in app.operatingDrones.keys() and app.headset.viconToUnityTransform is not None):
             if(len(app.operatingDrones[droneNamespace].currentTrajectory)>0):
                 return {"trajectoryPoints": [app.headset.transformViconPoint(point).tolist() for point in app.operatingDrones[droneNamespace].currentTrajectory]}
             else:
@@ -301,26 +300,56 @@ async def getDroneNames():
     return {"active_drones": list(app.operatingDrones.keys())}
 
         
+# @app.post("/uploadaudio")
+# async def uploadAudio(audioFile: UploadFile = File(...)):
+#     with app.lock:
+#         try:
+#             file_location = "received_audio.wav"
+#             with open(file_location, "wb") as buffer:
+#                 shutil.copyfileobj(audioFile.file, buffer)
+#             result = subprocess.run(
+#             ["python3", "server_code/api_process_voice_command.py", "received_audio.wav"], 
+#             capture_output=True, 
+#             text=True
+#             )
+#             return {
+#             "message": "File received and processed successfully!",
+#             "transcription_result": result.stdout}        
+#         except Exception as e:
+#             return {"error": str(e)}
+
+
 @app.post("/uploadaudio")
 async def uploadAudio(audioFile: UploadFile = File(...)):
     with app.lock:
         try:
             file_location = "received_audio.wav"
+            
+            # Save file in chunks for large uploads
             with open(file_location, "wb") as buffer:
-                shutil.copyfileobj(audioFile.file, buffer)
+                while chunk := audioFile.file.read(1024 * 1024):  # Read 1MB chunks
+                    buffer.write(chunk)
+            
+            # Use an absolute path for the script
+            script_path = "api_process_voice_command.py"
             result = subprocess.run(
-            ["python3", "server_code/api_process_voice_command.py", "received_audio.wav"], 
-            capture_output=True, 
-            text=True
+                ["python3", script_path, file_location], 
+                capture_output=True, 
+                text=True
             )
+
+            if result.returncode != 0:
+                return {
+                    "message": "File received, but script failed",
+                    "error": result.stderr
+                }
+
             return {
-            "message": "File received and processed successfully!",
-            "transcription_result": result.stdout}        
+                "message": "File received and processed successfully!",
+                "transcription_result": result.stdout
+            }        
         except Exception as e:
             return {"error": str(e)}
-
-
-
 
 
 
