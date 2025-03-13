@@ -174,3 +174,5 @@ cython_debug/
 example_voice_commands/
 
 vosk_model/
+
+apikey.txtapikey.txt
