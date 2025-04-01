@@ -7,8 +7,8 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 # Import your controller and bridge classes
-from HERO_XR_AR import HeroXR  
-from Json_ROS import DroneHeadsetBridge
+from hero_xr import HeroXR  
+# from Json_ROS import DroneHeadsetBridge
 
 def main(args=None):
     rclpy.init(args=args)
@@ -30,7 +30,7 @@ def main(args=None):
 
     # Store created node objects
     drone_nodes = []
-    bridge_nodes = []
+    # bridge_nodes = []
 
     # Create nodes for each "drone" in YAML
     for drone_name, info in robots_section.items():
@@ -47,10 +47,10 @@ def main(args=None):
         drone_nodes.append(hero_node)
         executor.add_node(hero_node)
 
-        # ========== 2) Create bridge node ==========
-        bridge_node = DroneHeadsetBridge(drone_name)
-        bridge_nodes.append(bridge_node)
-        executor.add_node(bridge_node)
+        # # ========== 2) Create bridge node ==========
+        # bridge_node = DroneHeadsetBridge(drone_name)
+        # bridge_nodes.append(bridge_node)
+        # executor.add_node(bridge_node)
 
     # Start execution
     try:
@@ -61,8 +61,8 @@ def main(args=None):
         # Destroy all nodes and shut down rclpy
         for node in drone_nodes:
             node.destroy_node()
-        for node in bridge_nodes:
-            node.destroy_node()
+        # for node in bridge_nodes:
+        #     node.destroy_node()
         rclpy.shutdown()
 
 if __name__ == '__main__':

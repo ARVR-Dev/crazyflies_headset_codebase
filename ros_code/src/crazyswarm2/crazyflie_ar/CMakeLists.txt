@@ -111,11 +111,9 @@ install(PROGRAMS
   scripts/aideck_streamer.py
   scripts/gui.py
   scripts/flash.py
-  scripts/HERO_XR_AR.py
-  scripts/Headset2ROS_Launch.py
-  scripts/Json_ROS.py
+  scripts/hero_xr.py
+  scripts/DroneServer_Launch.py
   scripts/PathFinder.py
-  scripts/HeadsetPose2Json.py
   scripts/CollisionAvoidance.py
   DESTINATION lib/${PROJECT_NAME}
 )

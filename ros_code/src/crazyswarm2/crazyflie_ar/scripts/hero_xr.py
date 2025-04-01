@@ -7,8 +7,6 @@ import os
 from std_msgs.msg import Empty
 from geometry_msgs.msg import Pose, PoseStamped, PoseArray
 from crazyflie_interfaces.srv import Takeoff, GoTo
-from rclpy.executors import MultiThreadedExecutor
-
 import numpy as np
 import time
 
@@ -19,6 +17,8 @@ from pathfinding3d.finder.a_star import AStarFinder
 import open3d as o3d
 from mpl_toolkits.mplot3d import Axes3D
 from PathFinder import PathFinder
+
+# Import for VICON QoS requirments
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
 
 #collision avoidance

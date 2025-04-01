@@ -8,11 +8,12 @@ import json
 
 from crazyflie_interfaces.msg import Status
 from geometry_msgs.msg import PoseStamped
+from vicon_receiver.msg import Position
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
 
-class HeadsetViconBridge(Node):
+class headsetlocomotion(Node):
     def __init__(self):
-        super().__init__(f"Vicon_headset_bridge")
+        super().__init__(f"Headset_Locomotion")
 
         # States of headset
         self.headset_pose = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -26,8 +27,8 @@ class HeadsetViconBridge(Node):
         )
 
         self.pose_sub = self.create_subscription(
-            PoseStamped,
-            f'/vrpn_mocap/cpsl_quest3/pose',
+            Position,
+            f'/vicon/cpsl_quest3/cpsl_quest3',
             self.pose_callback,
             qos_profile=qos_profile
         )
@@ -35,18 +36,18 @@ class HeadsetViconBridge(Node):
         # Timer: ROS -> Headset
         self.timer_ros_to_headset = self.create_timer(0.01, self.ros_to_headset)
 
-        self.get_logger().info(f"[HeadsetPose2Json] Node initialized.")
+        self.get_logger().info(f"[HeadsetLocomotion] Node initialized.")
 
     # ------------------- callbacks -------------------
-    def pose_callback(self, msg: PoseStamped):
+    def pose_callback(self, msg: Position):
         self.headset_pose = [
-            msg.pose.position.x,
-            msg.pose.position.y,
-            msg.pose.position.z,
-            msg.pose.orientation.x,
-            msg.pose.orientation.y,
-            msg.pose.orientation.z,
-            msg.pose.orientation.w
+            msg.x_trans/1000,
+            msg.y_trans/1000,
+            msg.z_trans/1000,
+            msg.x_rot,
+            msg.y_rot,
+            msg.z_rot,
+            msg.w
         ]
 
     # ------------------- ROS -> Headset -------------------
@@ -70,7 +71,7 @@ class HeadsetViconBridge(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = HeadsetViconBridge()
+    node = headsetlocomotion()
     executor = MultiThreadedExecutor()
     executor.add_node(node)
 

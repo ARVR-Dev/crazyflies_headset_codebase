@@ -30,6 +30,7 @@ ros2 topic pub --once /cf_1/go_to geometry_msgs/Pose "{position: {x: 0.0, y: 0.0
 
 #Launch Vicon
 ros2 launch vrpn_mocap client.launch.yaml server:=192.168.0.101 port:=3883
+ros2 launch vicon_receiver client.launch.py
 
 #Launch real drone server
 ros2 launch crazyflie_ar launch.py backend:=cflib
@@ -43,7 +44,5 @@ ros2 topic pub --once /cpsl_cf_1/go_to geometry_msgs/Pose "{position: {x: 0.0, y
 cd ~/Documents/crazyflies_headset_codebase/server_code
 python -m uvicorn ViconDroneServer:app --host 0.0.0.0 --port 8000 --reload
 
-ros2 run crazyflie_ar HeadsetPose2Json.py 
-
-ros2 run crazyflie_ar Headset2ROS_Launch.py 
-
+ros2 launch headset_ros_bridge headset_bridge.launch.py 
+ros2 run crazyflie_ar DroneServer_Launch.py

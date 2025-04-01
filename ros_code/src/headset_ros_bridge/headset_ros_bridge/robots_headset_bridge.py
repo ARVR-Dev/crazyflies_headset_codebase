@@ -6,11 +6,12 @@ import requests
 import json
 
 from crazyflie_interfaces.msg import Status
-from geometry_msgs.msg import Pose, PoseStamped, PoseArray
+from geometry_msgs.msg import Pose, PoseArray
 from std_msgs.msg import Empty
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
+from vicon_receiver.msg import Position
 
-class DroneHeadsetBridge(Node):
+class robots_headset_bridge(Node):
     def __init__(self, drone_name: str):
         super().__init__(f"drone_headset_bridge_{drone_name}")
         self.drone_name = drone_name
@@ -36,8 +37,8 @@ class DroneHeadsetBridge(Node):
 
         # Subscribe to pose  from Vicon
         self.pose_sub = self.create_subscription(
-            PoseStamped,
-            f'/vrpn_mocap/{self.drone_name}/pose',
+            Position,
+            f'/vicon/{self.drone_name}/{self.drone_name}',
             self.pose_callback,
             qos_profile=qos_profile
         )
@@ -74,7 +75,7 @@ class DroneHeadsetBridge(Node):
         # Last target point
         self.last_target = None
 
-        self.get_logger().info(f"[DroneHeadsetBridge] Node for {self.drone_name} initialized.")
+        self.get_logger().info(f"[Robots_Headset_Bridge] Node for {self.drone_name} initialized.")
 
     # ------------------- callbacks -------------------
     def status_callback(self, msg: Status):
@@ -83,15 +84,15 @@ class DroneHeadsetBridge(Node):
         percentage = max(0.0, min(100.0, (voltage - 3.16) / (4.2 - 3.16) * 100))
         self.battery_voltage = percentage  # Store percentage valuecpsl@cpsl-NUC13ANKi5
 
-    def pose_callback(self, msg: PoseStamped):
+    def pose_callback(self, msg: Position):
         self.drone_pose = [
-            msg.pose.position.x,
-            msg.pose.position.y,
-            msg.pose.position.z,
-            msg.pose.orientation.x,
-            msg.pose.orientation.y,
-            msg.pose.orientation.z,
-            msg.pose.orientation.w
+            msg.x_trans/1000,
+            msg.y_trans/1000,
+            msg.z_trans/1000,
+            msg.x_rot,
+            msg.y_rot,
+            msg.z_rot,
+            msg.w
         ]
 
     def waypoints_callback(self, msg: PoseArray):
@@ -121,39 +122,6 @@ class DroneHeadsetBridge(Node):
         except Exception as e:
             self.get_logger().error(f"[ROS -> Headset] Exception: {e}")
 
-        # battery_json = {
-        #     "Battery_voltage": {
-        #         "Name of Drone": self.drone_name,
-        #         "Voltage": float(self.battery_voltage)  # or "Percentage"
-        #     }cpsl@cpsl-NUC13ANKi5
-        # }
-
-        # pose_json = {
-        #     "Poses": {
-        #         "Name of Drone": self.drone_name,
-        #         "X": float(self.drone_pose[0]),
-        #         "Y": float(self.drone_pose[1]),
-        #         "Z": float(self.drone_pose[2])
-        #     }
-        # }
-
-        # trajectory_json = {
-        #     "Trajectory": {
-        #         "Waypoints": self.waypoints_list
-        #     }
-        # }
-
-        # merged_json = {**battery_json, **pose_json, **trajectory_json}
-
-        # url = "http://192.168.0.119:8000/ros_to_headset"
-        # try:
-        #     resp = requests.post(url, json=merged_json)
-        #     if resp.status_code == 200:
-        #         self.get_logger().debug("[ROS -> Headset] Data posted successfully.")
-        #     else:
-        #         self.get_logger().error(f"[ROS -> Headset] Failed to post data: {resp.status_code}")
-        # except Exception as e:
-        #     self.get_logger().error(f"[ROS -> Headset] Exception: {e}")
 
     # ------------------- Headset -> ROS -------------------
     def headset_to_ros(self):
