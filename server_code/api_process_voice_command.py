@@ -47,7 +47,7 @@ def execute_voice_command(command: str) -> str:
     """
     try:
         result = subprocess.run(
-            ["python3", "voice_control.py", command],
+            ["python3", "voice_control_v2.py", command],
             capture_output=True,
             text=True
         )
@@ -72,6 +72,8 @@ def process_audio_command(audio_file: str):
         print(f"Voice Control Response: {response}")
     else:
         print("No valid transcription found.")
+
+
 
 # Example usage
 if __name__ == "__main__":
