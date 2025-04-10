@@ -22,15 +22,12 @@ The system consists of the following main ROS packages:
    - `/poses`: Publishes all drones' position data
 
 3. **VICON Receiver**
-   - `/vicon_receiver`: 接收来自动作捕捉相机的原始 VICON 数据
-   - 提供头戴设备的位置追踪功能
-   - 支持多目标物体的实时位置追踪
+   - `/vicon_receiver`: Receives raw VICON data from motion capture cameras  
+   - Provides position tracking for head-mounted devices  
 
 4. **Drone Server**
-   - `/hero_xr_cf_1` 到 `/hero_xr_cf_n` 节点：独立的无人机控制节点
-   - 支持多无人机实例的并行控制
-   - 提供无人机状态监控和异常处理
-   - 实现与 VICON 系统的位置数据同步
+   - `/hero_xr_cf_1` to `/hero_xr_cf_n` nodes: Independent control nodes for each drone  
+   - Supports parallel control of multiple drone instances  
 
 5. **Headset Bridge**
    - `/robots_headset_bridge_cf_1` to `/robots_headset_bridge_cf_n`: Bridge nodes for each drone
