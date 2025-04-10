@@ -14,7 +14,7 @@ def crazyflie_takeoff(drone_id: str = "cpsl_cf_1") -> str:
     Publish a ROS2 command to make the specified crazyflie drone take off.
     Executes:
       ros2 topic pub --once /<drone_id>/takeoff std_msgs/Empty "{}"
-    :param drone_id: The drone identifier (e.g., "cf_1" or "cf_2").
+    :param drone_id: The drone identifier (e.g., "cpsl_cf_1" or "cpsl_cf_1").
     """
     try:
         result = subprocess.run(
