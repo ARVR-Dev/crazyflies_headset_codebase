@@ -1,7 +1,7 @@
 # HERO_XR
 
 ## Project Overview
-HERO_XR is a ROS2-based drone control system that enables control of Crazyflie drones through VR/AR headset devices. The system supports multi-drone collaborative control and integrates with the VICON motion capture system for precise positioning.
+HERO_XR is a ROS2-based drone control system that enables Crazyflie drones to be controlled through VR/AR headset devices. The system supports multi-drone collaborative control and integrates with the VICON motion capture system for precise positioning.
 
 ## System Architecture
 The system consists of the following main ROS packages:
@@ -17,7 +17,7 @@ The system consists of the following main ROS packages:
    - `/crazyfile_server`: Manages direct control and communication with physical drones
 
 2. **Motion Capture System**
-   A package to support Crazyflies with different mocap system.
+   A package to support Crazyflies with a different type of mocap system.
    - `/motion_capture_tracking`: Processes VICON camera data
    - `/poses`: Publishes all drones' position data
 
@@ -34,11 +34,11 @@ The system consists of the following main ROS packages:
    - `/headset_locomotion`: Processes headset movement data
    - Connects to Edge Server for AR interaction
 
-The system follows a modular architecture where motion capture data flows through the drone server to control physical drones, while the headset bridge enables user interaction through AR devices.
+The system follows a modular architecture. Motion capture data flows through the drone server to control physical drones, while the headset bridge enables user interaction through AR devices.
 
 ## Usage Instructions
 ### 1. Install Dependencies
-For crazyflies' path planning, we are using ["Pathfinding3D"](https://pypi.org/project/pathfinding3d/)
+For crazyflies' path planning, we are using [Pathfinding3D](https://pypi.org/project/pathfinding3d/)
 ```bash
 # Update rosdep
 sudo rosdep init
@@ -58,7 +58,7 @@ source install/setup.bash
 ```
 
 ### 2. Launch VICON System
-Before launching the node，make sure VICON is tracking all objects you need.
+Before launching the node， make sure VICON is tracking all the objects you need.
 ```bash
 # Start VICON motion capture system
 ros2 launch vicon_receiver client.launch.py
@@ -74,14 +74,14 @@ python -m uvicorn ViconDroneServer:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### 4. Start Drone Control Server
-Note: DroneServer_Launch.py and hero_xy.py files locate at "crazyflie_ar" package. To extend to different robots, you should copy and modify the hero_xr to adapt your robots. The launch file is reading the .yaml file in "config" to create nodes. 
+Note: DroneServer_Launch.py and hero_xy.py files are located at the "crazyflie_ar" package. To extend to different robots, you should copy and modify the hero_xr to adapt your robots. The launch file is reading the .yaml file in "config" to create nodes. 
 ```bash
 # Launch Crazyflie control server
 ros2 launch crazyflie_ar launch.py backend:=cflib
 ros2 run crazyflie_ar DroneServer_Launch.py
 ```
 ### 5. Launch Headset Bridge
-Note: The launch file here also reading the .yaml file to create nodes for each robots.
+Note: The launch file here also reads the .yaml file to create nodes for each robot.
 ```bash
 # Launch Headset Bridge
 ros2 launch headset_ros_bridge headset_bridge.launch.py 
@@ -110,19 +110,12 @@ ros2 topic echo
 
 # View system communication graph
 rqt_graph
-```## Important Notes
-1. Ensure all devices are on the same network
-2. Check VICON system functionality before use
-3. Ensure drones are sufficiently charged
-4. First-time setup requires setting execution permissions:
-```bash
-chmod +x ~/CrazySim/ros2_ws/install/crazyflie/lib/crazyflie/crazyflie_server.py
 ```
 
 ## Troubleshooting
-1. If unable to connect to drone, verify that the drone is powered on
-2. If positioning is inaccurate, check if VICON markers are intact
-3. If headset control is unresponsive, verify web server is running properly
+1. If unable to connect to the drone, verify that the drone is powered on
+2. If positioning is inaccurate, check VICON first, restart it, or redo calibration
+3. 3. If the headset control is unresponsive, verify that the web server is running properly
 
 
 ## License
