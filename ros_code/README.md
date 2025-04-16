@@ -3,6 +3,10 @@
 ## Project Overview
 HERO_XR is a ROS2-based drone control system that enables Crazyflie drones to be controlled through VR/AR headset devices. The system supports multi-drone collaborative control and integrates with the VICON motion capture system for precise positioning.
 
+# TODO
+-Add docs for using UWB implementation
+-Specify what YAML files need modified when adding/removing drones and how
+
 ## System Architecture
 The system consists of the following main ROS packages:
 - Modified crazyswarm2 (Original instruction: [https://imrclab.github.io/crazyswarm2/](https://imrclab.github.io/crazyswarm2/))
